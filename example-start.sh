@@ -1,0 +1,1 @@
+docker run -v $(pwd)/config.json:/config.json docker.io/library/pterodactyl-backup-manager:latest -c /config.json
