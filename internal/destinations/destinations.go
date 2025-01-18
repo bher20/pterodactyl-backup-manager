@@ -3,8 +3,8 @@ package destinations
 import (
 	"fmt"
 
-	"github.com/bher20/pterodactyl-backup-manager/internal/destinations/azure"
-	"github.com/bher20/pterodactyl-backup-manager/internal/destinations/local"
+	"github.com/bherville/pterodactyl-backup-manager/internal/destinations/azure"
+	"github.com/bherville/pterodactyl-backup-manager/internal/destinations/local"
 	log "github.com/sirupsen/logrus"
 )
 

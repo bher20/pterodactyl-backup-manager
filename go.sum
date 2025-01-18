@@ -11,8 +11,8 @@ github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0/go.mod h1:PXe2h+LKcW
 github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1 h1:WJTmL004Abzc5wDB5VtZG2PJk5ndYDgVacGqfirKxjM=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.3.2 h1:kYRSnvJju5gYVyhkij+RTJ/VR6QIUaCfWeaFm2ycsjQ=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.3.2/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
-github.com/bher20/pterodactyl-sdk-go v0.1.0 h1:+6qWueG5N3HSWZPsB5/HNlSre+KiEwtT1+ElgwKDclc=
-github.com/bher20/pterodactyl-sdk-go v0.1.0/go.mod h1:iopRajiZePt1bvFCJg/v55y6Nd6GZo8g2FZFjSFJA7k=
+github.com/bherville/pterodactyl-sdk-go v0.1.1 h1:o9q4cBkIvQdRvx4wEDiMUYbpfYoRl70g7AUJhEValj8=
+github.com/bherville/pterodactyl-sdk-go v0.1.1/go.mod h1:k3e9fxAzfOfJkq9Zg6jidSaErGT7to8k36IYQ3HVfb0=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

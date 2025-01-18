@@ -7,11 +7,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/bher20/pterodactyl-backup-manager/internal/config"
-	"github.com/bher20/pterodactyl-backup-manager/internal/destinations"
-	"github.com/bher20/pterodactyl-backup-manager/internal/utils"
+	"github.com/bherville/pterodactyl-backup-manager/internal/config"
+	"github.com/bherville/pterodactyl-backup-manager/internal/destinations"
+	"github.com/bherville/pterodactyl-backup-manager/internal/utils"
 
-	"github.com/bher20/pterodactyl-sdk-go/pkg/pterodactyl"
+	"github.com/bherville/pterodactyl-sdk-go/pkg/pterodactyl"
 
 	"github.com/robfig/cron"
 
