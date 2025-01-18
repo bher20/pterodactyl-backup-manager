@@ -4,7 +4,7 @@ Copyright © 2025 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
-	"github.com/bher20/pterodactyl-backup-manager/internal/server"
+	"github.com/bherville/pterodactyl-backup-manager/internal/server"
 
 	"github.com/spf13/cobra"
 )

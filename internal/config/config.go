@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/bher20/pterodactyl-backup-manager/internal/destinations"
-	"github.com/bher20/pterodactyl-backup-manager/internal/utils"
+	"github.com/bherville/pterodactyl-backup-manager/internal/destinations"
+	"github.com/bherville/pterodactyl-backup-manager/internal/utils"
 	"github.com/joho/godotenv"
 
-	"github.com/bher20/pterodactyl-sdk-go/pkg/pterodactyl"
+	"github.com/bherville/pterodactyl-sdk-go/pkg/pterodactyl"
 	log "github.com/sirupsen/logrus"
 )
 
