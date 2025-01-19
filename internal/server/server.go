@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 
@@ -26,69 +27,60 @@ const (
 	WAIT_FOR_BACKUP_SECONDS = 2
 )
 
-func PerformBackup(backupConfig *config.Backup, pterodatylServer *pterodactyl.PterodactylServer, appServer pterodactyl.Server, errorsFatal bool) error {
+func PerformBackup(backupConfig *config.Backup, pterodactylServer *pterodactyl.PterodactylServer, appServer pterodactyl.Server, errorsFatal bool, tmpDirPath string, deleteAfterBackup bool) (*pterodactyl.Backup, error) {
 	log.Info(fmt.Sprintf("Running backup of '%s'...", appServer.Attributes.Name))
 
-	backup, err := pterodactyl.BackupServer(*pterodatylServer, appServer)
+	backup, err := pterodactyl.BackupServerWithWait(*pterodactylServer, appServer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	log.Info(fmt.Sprintf("Backup '%s' started!", backup.Attributes.UUID))
-
-	// Wait until backup is completed on the pterodatylServer side
-	log.Info(fmt.Sprintf("Waiting for '%s' to finish...", backup.Attributes.UUID))
-	for {
-		backup, err = pterodactyl.GetServerBackup(*pterodatylServer, appServer, backup.Attributes.UUID)
-		log.Trace(fmt.Sprintf("Backup '%s' backup.Attributes.CompletedAt is zero: %t with err: %s!", backup.Attributes.UUID, time.Time.IsZero(backup.Attributes.CompletedAt), err))
-
-		if !time.Time.IsZero(backup.Attributes.CompletedAt) {
-			log.Info(fmt.Sprintf("Backup '%s' was completed at '%s'!", backup.Attributes.UUID, backup.Attributes.CompletedAt.Format(utils.TIME_FORMAT)))
-			time.Sleep(2 * time.Second)
-			break
-		}
-		log.Trace(fmt.Sprintf("Still waiting for '%s' to finish...", backup.Attributes.UUID))
-	}
-
+	downloadPath := filepath.Join(tmpDirPath, backup.Attributes.UUID)
 	log.Info(fmt.Sprintf("Downlading new backup '%s'!", backup.Attributes.UUID))
-	backupFileBytes, err := pterodactyl.DownloadServerBackup(*pterodatylServer, appServer, backup.Attributes.UUID)
+	backupFile, err := pterodactyl.DownloadServerBackup(*pterodactylServer, appServer, backup.Attributes.UUID, downloadPath)
 	if err != nil {
-		return err
-	}
-
-	if len(backupFileBytes) == 0 {
-		return fmt.Errorf("backup size is 0 bytes")
+		return nil, err
 	}
 
 	log.Info(fmt.Sprintf("Sending new backup '%s' to configured destinations!", backup.Attributes.Name))
-	errs := destinations.Backup(backupConfig.Destinations, backup.Attributes.UUID, backupFileBytes)
+	errs := destinations.Backup(backupConfig.Destinations, backup.Attributes.UUID, backupFile)
 	if len(errs) > 0 {
 		log.Error(errs)
-		return fmt.Errorf("destination publishing failed with errors: %s", errs)
+		return nil, fmt.Errorf("destination publishing failed with errors: %s", errs)
 	}
 
-	return nil
+	// Perform cleanup
+	log.Debug(fmt.Sprintf("Deleting downloaded backup from temp path: %s", downloadPath))
+	utils.DeleteFileIfExists(downloadPath)
+
+	if deleteAfterBackup {
+		log.Info(fmt.Sprintf("Deleting new backup '%s' from Pterodactyl server...", backup.Attributes.UUID))
+		pterodactyl.DeleteServerBackup(*pterodactylServer, appServer, backup.Attributes.UUID)
+	}
+
+	return backup, nil
 }
 
-func startScheduler(configFile *config.Configuration) {
+func startScheduler(configFile *config.Configuration, tmpDirPath string) {
 	cronSchedular = cron.New()
 
 	for _, backupConfig := range configFile.Backups {
-		pterodatylServer, err := config.GetPterodatylServer(backupConfig.PterodactylServer, configFile.PterodactylServers)
+		pterodactylServer, err := config.GetPterodactylServer(backupConfig.PterodactylServer, configFile.PterodactylServers)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		for _, appServerConfig := range backupConfig.Servers {
-			appServer, err := pterodactyl.GetServer(*pterodatylServer, appServerConfig.Uuid)
+			appServer, err := pterodactyl.GetServer(*pterodactylServer, appServerConfig.Uuid)
 			if err != nil {
 				log.Fatal(err)
 			}
 
-			log.Info(fmt.Sprintf("Scheduling job for %s with schedule '%s'", appServer.Attributes.Name, appServerConfig.CronSchedule))
+			log.Info(fmt.Sprintf("Scheduling job for '%s' with schedule '%s'", appServer.Attributes.Name, appServerConfig.CronSchedule))
 
 			cronSchedular.AddFunc(appServerConfig.CronSchedule, func() {
-				PerformBackup(&backupConfig, pterodatylServer, appServer, false)
+				_, err := PerformBackup(&backupConfig, pterodactylServer, appServer, false, tmpDirPath, appServerConfig.DeleteAfterBackup)
+				utils.HandleError(err, false)
 			})
 		}
 	}
@@ -96,20 +88,20 @@ func startScheduler(configFile *config.Configuration) {
 	cronSchedular.Start()
 }
 
-func serve(configFilePath string) {
+func serve(configFilePath, tmpDirPath string) {
 	configFile, err := config.ParseConfig(configFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	startScheduler(configFile)
+	startScheduler(configFile, tmpDirPath)
 
 	for {
 		time.Sleep(time.Second)
 	}
 }
 
-func Start(configFilePath string) {
+func Start(configFilePath, tmpDirPath string) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -123,5 +115,5 @@ func Start(configFilePath string) {
 		os.Exit(0)
 	}()
 
-	serve(configFilePath)
+	serve(configFilePath, tmpDirPath)
 }

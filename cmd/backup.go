@@ -22,20 +22,20 @@ and usage of using your command. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	PreRun: setLogging,
 	Run: func(cmd *cobra.Command, args []string) {
 		configFile, err := config.ParseConfig(cfgFile)
 		utils.HandleError(err, true)
 
 		for _, backupConfig := range configFile.Backups {
-			pterodatylServer, err := config.GetPterodatylServer(backupConfig.PterodactylServer, configFile.PterodactylServers)
+			pterodactylServer, err := config.GetPterodactylServer(backupConfig.PterodactylServer, configFile.PterodactylServers)
 			utils.HandleError(err, true)
 
 			for _, appServerConfig := range backupConfig.Servers {
-				appServer, err := pterodactyl.GetServer(*pterodatylServer, appServerConfig.Uuid)
+				appServer, err := pterodactyl.GetServer(*pterodactylServer, appServerConfig.Uuid)
 				utils.HandleError(err, true)
 
-				utils.HandleError(server.PerformBackup(&backupConfig, pterodatylServer, appServer, true), true)
+				_, err = server.PerformBackup(&backupConfig, pterodactylServer, appServer, true, tmpDirPath, appServerConfig.DeleteAfterBackup)
+				utils.HandleError(err, true)
 			}
 		}
 	},
@@ -43,14 +43,4 @@ to quickly create a Cobra application.`,
 
 func init() {
 	rootCmd.AddCommand(backupCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// backupCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// backupCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
