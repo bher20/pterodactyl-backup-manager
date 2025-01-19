@@ -1,8 +1,10 @@
 package azure
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"os"
 
 	log "github.com/sirupsen/logrus"
 
@@ -50,7 +52,7 @@ func getClient(azureStorageAccount *AzureStorageAccountDestination) (*azblob.Cli
 	return client, nil
 }
 
-func Backup(azureStorageAccount *AzureStorageAccountDestination, fileName string, fileData []byte) error {
+func Backup(azureStorageAccount *AzureStorageAccountDestination, fileName string, filePath string) error {
 	blobClient, err := getClient(azureStorageAccount)
 	if err != nil {
 		return err
@@ -62,7 +64,13 @@ func Backup(azureStorageAccount *AzureStorageAccountDestination, fileName string
 		blobName = fmt.Sprintf("%s/%s", *azureStorageAccount.BlobPrefix, blobName)
 	}
 	log.Info(fmt.Sprintf("Uploading a blob '%s:/%s' to Azure Storage Account '%s'", azureStorageAccount.ContainerName, blobName, azureStorageAccount.Name))
-	_, err = blobClient.UploadBuffer(context.TODO(), azureStorageAccount.ContainerName, blobName, fileData, nil)
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+
+	_, err = blobClient.UploadStream(context.TODO(), azureStorageAccount.ContainerName, blobName, bufio.NewReader(file), nil)
 
 	return err
 }

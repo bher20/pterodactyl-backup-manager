@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/Azure/azure-sdk-for-go/sdk/azidentity v1.8.1
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.5.0
-	github.com/bherville/pterodactyl-sdk-go v0.1.1
+	github.com/bherville/pterodactyl-sdk-go v0.1.3
 	github.com/joho/godotenv v1.5.1
 	github.com/robfig/cron v1.2.0
 	github.com/sirupsen/logrus v1.9.3

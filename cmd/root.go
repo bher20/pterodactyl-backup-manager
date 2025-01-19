@@ -6,13 +6,17 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/bherville/pterodactyl-backup-manager/internal/utils"
+	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
 	cfgFile       string
+	tmpDirPath    string
 	debugLogging  bool
 	traceLoggging bool
 )
@@ -50,7 +54,24 @@ examples and usage of using your application. For example:
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		setLogging(cmd, args)
+
+		err := utils.CreateDirIfNotExists(tmpDirPath, 0755)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+	},
 }
+
+// PersistentPreRunE: func(cmd *Command, args []string): {
+// 	err := utils.CreateDirIfNotExists(tmpDirPath, 0755)
+// 	if err != nil {
+// 		logrus.Fatal(err)
+// 	}
+
+// 	return err
+// }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
@@ -68,4 +89,10 @@ func init() {
 
 	// Config flags
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.json", "config file")
+
+	dir, err := os.Getwd()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	rootCmd.PersistentFlags().StringVar(&tmpDirPath, "tmp-dir", filepath.Join(dir, "tmp"), "config file")
 }

@@ -20,9 +20,10 @@ type Backup struct {
 }
 
 type Server struct {
-	Uuid         string `json:"uuid"`
-	Name         string `json:"name"`
-	CronSchedule string `json:"cronSchedule"`
+	Uuid              string `json:"uuid"`
+	Name              string `json:"name"`
+	CronSchedule      string `json:"cronSchedule"`
+	DeleteAfterBackup bool   `json:"deleteAfterBackup"`
 }
 
 type Configuration struct {
@@ -62,7 +63,7 @@ func ParseConfig(configFile string) (*Configuration, error) {
 	return &configuration, nil
 }
 
-func GetPterodatylServer(pterodactylServerName string, pterodactylServers []pterodactyl.PterodactylServer) (*pterodactyl.PterodactylServer, error) {
+func GetPterodactylServer(pterodactylServerName string, pterodactylServers []pterodactyl.PterodactylServer) (*pterodactyl.PterodactylServer, error) {
 	var foundPterodactylServer *pterodactyl.PterodactylServer
 	for _, pterodactylServer := range pterodactylServers {
 		if pterodactylServer.Name == pterodactylServerName {

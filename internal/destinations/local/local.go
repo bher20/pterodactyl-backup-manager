@@ -9,16 +9,10 @@ import (
 )
 
 type LocalDestination struct {
-	BackupDirectory string       `json:"backupDirectory"`
-	FilePermissions *os.FileMode `json:"filePermissions,omitempty"`
+	BackupDirectory string `json:"backupDirectory"`
 }
 
-func Backup(local *LocalDestination, fileName string, fileData []byte) error {
-	permissions := os.FileMode(0644)
-	if local.FilePermissions != nil {
-		permissions = *local.FilePermissions
-	}
-
+func Backup(local *LocalDestination, fileName string, filePath string) error {
 	_, err := os.Stat(local.BackupDirectory)
 	if err != nil {
 		return err
@@ -27,5 +21,10 @@ func Backup(local *LocalDestination, fileName string, fileData []byte) error {
 	backupPath := filepath.Join(local.BackupDirectory, fileName)
 	log.Trace(fmt.Sprintf("Writing backup to: %s", backupPath))
 
-	return os.WriteFile(backupPath, fileData, permissions)
+	err = os.Rename(filePath, backupPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

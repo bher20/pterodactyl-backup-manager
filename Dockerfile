@@ -21,13 +21,24 @@ COPY ./*.go ${APP_DIR}/
 RUN CGO_ENABLED=0 GOOS=linux go build -o /pterodactyl-backup-manager
 
 
-
-FROM gcr.io/distroless/base-debian11 AS build-release-stage
-
-WORKDIR /
+FROM alpine:3 AS build-release-stage
 
 COPY --from=build-stage /pterodactyl-backup-manager /pterodactyl-backup-manager
 
-USER nonroot:nonroot
+RUN apk add --no-cache --update curl ca-certificates openssl git tar bash sqlite fontconfig \
+    && adduser --disabled-password --home /home/container container
 
-ENTRYPOINT [ "/pterodactyl-backup-manager", "serve" ]
+USER container
+ENV  USER=container HOME=/home/container
+
+WORKDIR /home/container
+
+COPY ./scripts/entrypoint.sh /entrypoint.sh
+COPY ./metadata.json /metadata.json
+
+CMD ["/bin/bash", "/entrypoint.sh"]
+
+LABEL \
+  MAINTAINER="Bherville, <support@bherville.com>" \
+  org.opencontainers.image.source=https://github.com/bherville/pterodactyl-backup-manager
+    
