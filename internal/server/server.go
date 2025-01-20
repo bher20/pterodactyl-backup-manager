@@ -14,8 +14,7 @@ import (
 
 	"github.com/bherville/pterodactyl-sdk-go/pkg/pterodactyl"
 
-	"github.com/robfig/cron"
-
+	cron "github.com/robfig/cron/v3"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -62,7 +61,9 @@ func PerformBackup(backupConfig *config.Backup, pterodactylServer *pterodactyl.P
 }
 
 func startScheduler(configFile *config.Configuration, tmpDirPath string) {
-	cronSchedular = cron.New()
+	cronSchedular = cron.New(cron.WithChain(
+		cron.Recover(cron.DefaultLogger),
+	))
 
 	for _, backupConfig := range configFile.Backups {
 		pterodactylServer, err := config.GetPterodactylServer(backupConfig.PterodactylServer, configFile.PterodactylServers)

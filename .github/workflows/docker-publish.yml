@@ -36,12 +36,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Get Version
-        id: vars
-        run: |
-          version=$(jq -r '.version' metadata.json)
-          echo ::set-env name=VERSION::${version}
         
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
