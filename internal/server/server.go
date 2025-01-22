@@ -97,6 +97,8 @@ func serve(configFilePath, tmpDirPath string) {
 
 	startScheduler(configFile, tmpDirPath)
 
+	log.Info("Server started")
+
 	for {
 		time.Sleep(time.Second)
 	}
