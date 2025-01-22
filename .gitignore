@@ -1,3 +1,6 @@
 # Local configuration files
 config.json
 .env
+
+# Local Temporary files
+/tmp

@@ -41,7 +41,7 @@ func setupEnv() {
 
 	_, err := os.Stat(envFile)
 	if err != nil {
-		utils.HandleError(err, true)
+		log.Warn("No .env file found, will not attempt to configure environment...")
 	} else {
 		err := godotenv.Load(envFile)
 		utils.HandleError(err, true)
